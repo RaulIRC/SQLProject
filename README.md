@@ -15,22 +15,29 @@ An in-depth paragraph about your project and overview of use.
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+* Installing MySQL Connector for Python
+* Recommended using PIP to install "MySQL Connector"
+* Open Python console to the location of PIP, and type the following:
+```
+C:\Users\ "Your Name" \AppData\Local\Programs\Python\Python36-32\Scripts>python -m pip install 
+  mysql-connector-python
+```
 
 ### Executing program
 
-* How to run the program
-* Step-by-step bullets
+* Download the zip file containing the files and place them inside a directory of your choice.
+* Using Visual Studio Code is the best option but we will be setting this up in the Terminal/CMD directly.
+* Make sure to open the Terminal to the folder containing the "main.py" file.
+* Then run the following code:
 ```
-code blocks for commands
+C:\Users\ "Your Name" \..\..\SQLProject>python main.py
 ```
 
 ## Help
 
-Any advise for common problems or issues.
+Any advice for common problems or issues?
 ```
-command to run if program contains helper info
+command to run if the program contains helper info
 ```
 
 ## Authors
