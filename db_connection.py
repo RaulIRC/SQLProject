@@ -55,12 +55,8 @@ def connect_to_database(mydb_config: dict[str, ], create_if_not_exists=False):
 
     return None, None
 
-def execute(cursor):
-    cursor.execute(f"CREATE TABLE {database_table}(stdId int PRIMARY KEY Auto_Increment, username varchar(25), password varchar(25), balance int);")
-    print("Table Created!")
-    return
-
 def databaseCreation(cursor, mydb_config):
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {mydb_config['database']};")
     cursor.execute(f"Use {mydb_config['database']};")
-    execute(cursor)
+    cursor.execute(f"CREATE TABLE {database_table}(stdId int PRIMARY KEY Auto_Increment, username varchar(25), password varchar(25), balance int);")
+    print("Table Created!")

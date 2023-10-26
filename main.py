@@ -9,10 +9,10 @@ conn, cursor = connect_to_database(mydb_config, create_if_not_exists = True)
 def choice_function(choice):
     if choice == "1":
         print("You selected Option 1")
-        login(cursor)
+        login(conn, cursor)
     elif choice == "2":
         print("You selected Option 2")
-        register(cursor)
+        register(conn, cursor)
     elif choice == "3":
         print("You selected Option 3")
         return
@@ -23,7 +23,6 @@ def choice_function(choice):
 
 def mainmenu():
     choice_sel = ""
-
 
     while choice_sel != "q":
         draw_menu()

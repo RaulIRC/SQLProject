@@ -18,7 +18,7 @@ database_table = "ACCOUNTS"
 ### PARAMETERS ###
 
 # MySQL server connection parameters
-mydb_config = {
+mydb_config: dict[str, ] = {
     'host': hostw,
     'user': userw,
     'password': passwordw,
