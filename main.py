@@ -24,7 +24,7 @@ def choice_function(choice):
 def mainmenu():
     choice_sel = ""
 
-    while choice_sel != "q":
+    if choice_sel != "q" or "1":
         draw_menu()
         choice_sel = input("Select from the options above\nOr input 'q' to quit the program: ")
         choice_function(choice_sel)

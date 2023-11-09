@@ -1,6 +1,7 @@
 from settings import database_table, default_balance, databasew
 from db_connection import *
 import os
+import bcrypt
 
 def draw_menu():
     print("|    Select from the options below!    |")
@@ -50,13 +51,26 @@ def register(conn, cursor):
 
     username_choice = input("Please input your username of choice: ")
 
-    if not username_check(username_choice):
+    if not username_check(cursor, username_choice):
 
         print("Username was accepted!")
 
         password_choice = input("Please input your password: ")
 
-        sql_query = "INSERT INTO %s(username, password, balance) VALUES ('%s', '%s', '%s')" % (database_table, username_choice, password_choice, default_balance)
+        # We're going to be hashing the password here
+        # Remember that the has is over 25 characters long so make
+        # - sure to redo the table to take in the hashed password
+
+        salt_gen = bcrypt.gensalt()
+        print("Salt Generated!")
+
+        hashed_pw = bcrypt.hashpw((password_choice), salt_gen)
+        print("Hashed Password Generated!")
+
+        test = bcrypt.checkpw(password_choice, hashed_pw)
+        print("Does password Match?" + test)
+
+        sql_query = "INSERT INTO %s(username, password, balance) VALUES ('%s', '%s', '%s')" % (database_table, username_choice, hashed_pw, default_balance)
 
         cursor.execute(sql_query)
 
