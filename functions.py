@@ -38,15 +38,17 @@ def user_check(cursor, username_choice, password_choice):
 
     myresult = cursor.fetchall()
 
-    bcrypt.checkpw(password_choice, myresult)
+    password_choice.encode(encoding = 'UTF-8', errors = 'strict')
 
-    if bcrypt.checkpw(password_choice, myresult):
+    bcrypt.checkpw(password_choice.encode('UTF-8'), myresult)
+
+    if bcrypt.checkpw(password_choice.encode('UTF-8'), myresult):
         print(myresult)
         print("LOGIN SUCCESSFUL")
         return True
     else:
         print("Username and Password did not match.")
-        print(bcrypt.checkpw(password_choice, myresult))
+        print(bcrypt.checkpw(password_choice.encode('UTF-8'), myresult))
         return False
 
 def register(conn, cursor):
