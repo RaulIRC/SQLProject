@@ -38,11 +38,15 @@ def user_check(cursor, username_choice, password_choice):
 
     myresult = cursor.fetchall()
 
-    if myresult:
+    bcrypt.checkpw(password_choice, myresult)
+
+    if bcrypt.checkpw(password_choice, myresult):
         print(myresult)
+        print("LOGIN SUCCESSFUL")
         return True
     else:
         print("Username and Password did not match.")
+        print(bcrypt.checkpw(password_choice, myresult))
         return False
 
 def register(conn, cursor):
@@ -64,11 +68,8 @@ def register(conn, cursor):
         salt_gen = bcrypt.gensalt()
         print("Salt Generated!")
 
-        hashed_pw = bcrypt.hashpw((password_choice), salt_gen)
+        hashed_pw = bcrypt.hashpw(password_choice, salt_gen)
         print("Hashed Password Generated!")
-
-        test = bcrypt.checkpw(password_choice, hashed_pw)
-        print("Does password Match?" + test)
 
         sql_query = "INSERT INTO %s(username, password, balance) VALUES ('%s', '%s', '%s')" % (database_table, username_choice, hashed_pw, default_balance)
 
@@ -119,6 +120,8 @@ def login(cursor):
     username_choice = input("Please input your username: ")
 
     password_choice = input("Please input your password: ")
+
+    stored_hash = myresult
 
     # Just testing a new function for the system.
     if not user_check(cursor, username_choice, password_choice):
