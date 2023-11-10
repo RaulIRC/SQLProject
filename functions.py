@@ -31,6 +31,28 @@ def reset_values():
     password_choice = ""
     return username_choice, password_choice
 
+def hash_password(password_choice):
+
+    password_choice.encode(encoding = 'UTF-8', errors = 'strict')
+
+    hashword = bcrypt.hashpw(password_choice.encode('UTF-8'), bcrypt.gensalt)
+
+    return hashword
+
+def hash_check(myresult, password_choice):
+    password_choice
+
+def new_check(cursor, username_choice, hashword, password_choice):
+    sql_query = "SELECT USERNAME, PASSWORD FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, hashword)
+
+    cursor.execute(sql_query)
+
+    myresult = cursor.fetchall()
+    print(myresult)
+
+def newpw_check(cursor, hashword, password_choice):
+
+
 def user_check(cursor, username_choice, password_choice):
     sql_query = "SELECT USERNAME, PASSWORD FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, password_choice)
     
@@ -66,12 +88,6 @@ def register(conn, cursor):
         # We're going to be hashing the password here
         # Remember that the has is over 25 characters long so make
         # - sure to redo the table to take in the hashed password
-
-        salt_gen = bcrypt.gensalt()
-        print("Salt Generated!")
-
-        hashed_pw = bcrypt.hashpw(password_choice, salt_gen)
-        print("Hashed Password Generated!")
 
         sql_query = "INSERT INTO %s(username, password, balance) VALUES ('%s', '%s', '%s')" % (database_table, username_choice, hashed_pw, default_balance)
 
