@@ -13,7 +13,9 @@ portw = 3306
 
 ### TABLE NAMES ###
 
-database_table = "ACCOUNTS"
+database_table = "USERS"
+
+database_account = "ACCOUNTS"
 
 ### PARAMETERS ###
 

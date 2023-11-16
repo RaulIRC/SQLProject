@@ -1,13 +1,6 @@
-from settings import database_table, default_balance, databasew
+from settings import database_table, default_balance, databasew, database_account
 from db_connection import *
 import os
-import bcrypt
-
-def draw_menu():
-    print("|    Select from the options below!    |")
-    print("|             1 : Login                |")
-    print("|            2 : Register              |")
-    print("|        3 : Work-In-Progress          |")
 
 def draw_menu():
     # Clear the screen
@@ -23,55 +16,38 @@ def draw_menu():
     print("    3. Nothing, Work In Progress     ")
     print("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
 
-# This password check function is being used for the login function to check if it matches the one in the system.
-# I just made it because I needed to see if I could get both values.
-
 def reset_values():
+    sql_query = ""
     username_choice = ""
     password_choice = ""
+    return sql_query, username_choice, password_choice
+
+def get_user_pass():
+    username_choice = input("Please input your username: ")
+    password_choice = input("Please input your password: ")
     return username_choice, password_choice
 
-def hash_password(password_choice):
-
-    password_choice.encode(encoding = 'UTF-8', errors = 'strict')
-
-    hashword = bcrypt.hashpw(password_choice.encode('UTF-8'), bcrypt.gensalt)
-
-    return hashword
-
-def hash_check(myresult, password_choice):
-    password_choice
-
-def new_check(cursor, username_choice, hashword, password_choice):
-    sql_query = "SELECT USERNAME, PASSWORD FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, hashword)
-
-    cursor.execute(sql_query)
-
-    myresult = cursor.fetchall()
-    print(myresult)
-
-def newpw_check(cursor, hashword, password_choice):
-
-
-def user_check(cursor, username_choice, password_choice):
-    sql_query = "SELECT USERNAME, PASSWORD FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, password_choice)
+def login(cursor):
     
+    reset_values()
+
+    username_choice = input("Please input your username: ")
+    password_choice = input("Please input your password: ")
+
+    sql_query = "SELECT PASSWORD FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, password_choice)
+
     cursor.execute(sql_query)
 
-    myresult = cursor.fetchall()
+    reset_values()
 
-    password_choice.encode(encoding = 'UTF-8', errors = 'strict')
+    result = cursor.fetchall()
 
-    bcrypt.checkpw(password_choice.encode('UTF-8'), myresult)
-
-    if bcrypt.checkpw(password_choice.encode('UTF-8'), myresult):
-        print(myresult)
-        print("LOGIN SUCCESSFUL")
-        return True
+    if result:
+        display_menu()
+        print("true")
     else:
-        print("Username and Password did not match.")
-        print(bcrypt.checkpw(password_choice.encode('UTF-8'), myresult))
-        return False
+        print("Username and Password not matching anything in the system please try again!")
+        print("false")
 
 def register(conn, cursor):
 
@@ -80,16 +56,11 @@ def register(conn, cursor):
     username_choice = input("Please input your username of choice: ")
 
     if not username_check(cursor, username_choice):
-
         print("Username was accepted!")
 
         password_choice = input("Please input your password: ")
 
-        # We're going to be hashing the password here
-        # Remember that the has is over 25 characters long so make
-        # - sure to redo the table to take in the hashed password
-
-        sql_query = "INSERT INTO %s(username, password, balance) VALUES ('%s', '%s', '%s')" % (database_table, username_choice, hashed_pw, default_balance)
+        sql_query = "INSERT INTO %s(username, password) VALUES ('%s', '%s')" % (database_table, username_choice, password_choice)
 
         cursor.execute(sql_query)
 
@@ -104,15 +75,16 @@ def register(conn, cursor):
 
         register()
 
+
+
 def username_check(cursor, username_choice):
     sql_query = "SELECT USERNAME FROM %s WHERE USERNAME = '%s'" % (database_table, username_choice)
-    #variables = database_table, username_choice
+    
     cursor.execute(sql_query)
 
     myresult = cursor.fetchall()
 
     if myresult:
-        print(myresult)
         return True
     else:
         print("Username was not found in the database!")
@@ -120,57 +92,222 @@ def username_check(cursor, username_choice):
 
 def password_check(cursor, username_choice):
     sql_query = "SELECT PASSWORD FROM %s WHERE USERNAME = '%s'" % (database_table, username_choice)
-    #variables = database_table, username_choice
+    
     cursor.execute(sql_query)
 
     myresult = cursor.fetchall()
 
     if myresult:
-        print(myresult)
         return True
     else:
         print("Password was not found in the database!")
         return False
 
-def login(cursor):
-    reset_values()
 
-    username_choice = input("Please input your username: ")
+def display_account_menu():
+    print("\n=== MENU ===")
+    print("1. View all accounts")
+    print("2. View accounts by Account Type")
+    print("3. View accounts by Customer ID")
+    print("4. Exit")
 
-    password_choice = input("Please input your password: ")
-
-    stored_hash = myresult
-
-    # Just testing a new function for the system.
-    if not user_check(cursor, username_choice, password_choice):
-        print("ERROR: USERNAME AND PASSWORD ARE NOT FOUND")
+def view_all_accounts(cursor):
+    cursor.execute("SELECT * FROM Account")
+    accounts = cursor.fetchall()
+    if accounts:
+        print("\n=== All Accounts ===")
+        for account in accounts:
+            print(account)
     else:
-        print(username_choice, password_choice)
-        print("CORRECT INFORMATION LOGGING IN")
+        print("No accounts found.")
 
-def databaseCreate(cursor):
-    sql_query = "CREATE DATABASE IF NOT EXISTS '%s'" % (databasew)
-    cursor.execute(sql_query)
+def view_accounts_by_type(cursor):
+    account_type = input("Enter Account Type: ")
+    cursor.execute("SELECT * FROM Account WHERE AccountType = ?", (account_type,))
+    accounts = cursor.fetchall()
+    if accounts:
+        print(f"\n=== Accounts with Account Type '{account_type}' ===")
+        for account in accounts:
+            print(account)
+    else:
+        print(f"No accounts found with Account Type '{account_type}'.")
 
-    myresult = cursor.fetchall()
+def view_accounts_by_customer_id(cursor):
+    customer_id = input("Enter Customer ID: ")
+    cursor.execute("SELECT * FROM Account WHERE CustomerID = ?", (customer_id,))
+    accounts = cursor.fetchall()
+    if accounts:
+        print(f"\n=== Accounts for Customer ID '{customer_id}' ===")
+        for account in accounts:
+            print(account)
+    else:
+        print(f"No accounts found for Customer ID '{customer_id}'.")
 
-    print(myresult)
-    print("DATABASE HAS BEEN CREATED LETS GOOO")
+def view_all_customers(cursor):
+    cursor.execute("SELECT * FROM Customer")
+    customers = cursor.fetchall()
+    if customers:
+        print("\n=== All Customers ===")
+        for customer in customers:
+            print(customer)
+    else:
+        print("No customers found.")
 
-def databaseErrorMenu():
-    print("************************************************")
-    print("    Welcome to the Database Creation Wizard    ")
-    print("************************************************")
-    print("Warning: You are about to create a new database.")
-    
+# Function to find customer by ID
+def find_customer_by_id(cursor):
+    customer_id = input("Enter Customer ID: ")
+    cursor.execute("SELECT * FROM Customer WHERE CustomerID = ?", (customer_id,))
+    customer = cursor.fetchone()
+    if customer:
+        print(f"\n=== Customer with ID '{customer_id}' ===")
+        print(customer)
+    else:
+        print(f"No customer found with ID '{customer_id}'.")
+
+# Function to find customer by Name
+def find_customer_by_name(cursor):
+    name = input("Enter Customer Name: ")
+    cursor.execute("SELECT * FROM Customer WHERE Name = ?", (name,))
+    customers = cursor.fetchall()
+    if customers:
+        print(f"\n=== Customers with Name '{name}' ===")
+        for customer in customers:
+            print(customer)
+    else:
+        print(f"No customers found with Name '{name}'.")
+
+def display_customer_menu():
+    print("\n=== MENU ===")
+    print("1. View all customers")
+    print("2. Find customer by ID")
+    print("3. Find customer by Name")
+    print("4. Exit")
+
+
+# Function to view all transactions
+def view_all_transactions(cursor):
+    print("You've chosen to view all transactions.")
+    print("\nStep 1: Fetching all transactions...")
+    cursor.execute("SELECT * FROM Transaction")
+    transactions = cursor.fetchall()
+    if transactions:
+        print("\nStep 2: Displaying all transactions")
+        print("\n=== All Transactions ===")
+        for transaction in transactions:
+            print(transaction)
+    else:
+        print("\nStep 2: No transactions found.")
+
+
+# Function to find transactions by Account ID
+def find_transactions_by_account_id(cursor):
+    print("You've chosen to find transactions by Account ID.")
+    account_id = input("Enter Account ID: ")
+    print(f"\nStep 1: Searching for transactions with Account ID '{account_id}'...")
+    cursor.execute("SELECT * FROM Transaction WHERE AccountID = ?", (account_id,))
+    transactions = cursor.fetchall()
+    if transactions:
+        print(f"\nStep 2: Displaying transactions for Account ID '{account_id}'")
+        print(f"\n=== Transactions for Account ID '{account_id}' ===")
+        for transaction in transactions:
+            print(transaction)
+    else:
+        print(f"\nStep 2: No transactions found for Account ID '{account_id}'.")
+
+
+
+def display_transactions_menu():
+    print("\n=== MENU ===")
+    print("1. View all transactions")
+    print("2. Find transactions by Account ID")
+    print("3. Exit")
+
+
+def main_menu(cursor):
     while True:
-        choice = input("Do you want to continue? (Y/n): ").strip().lower()
-    
-        if choice == "yes":
-            #print("\nDatabase created successfully!\n")
-            return True
-        elif choice == "no":
-            print("\nDatabase creation canceled. Exiting program.\n")
-            return False
+        # Clear the screen
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+        print("\033[1;33m")  # Bold and yellow color
+        print("=== STAFF MAIN MENU ===")
+        print("\033[0;36m")  # Cyan color
+        print("1. \033[1;36mAccount Menu\033[0;36m")
+        print("2. \033[1;36mCustomer Menu\033[0;36m")
+        print("3. \033[1;36mTransactions Menu\033[0;36m")
+        print("4. \033[1;36mExit\033[0m")  # Reset to default color
+        print("\033[0m")  # Reset formatting
+
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            display_account_menu(cursor)
+        elif choice == "2":
+            display_customer_menu(cursor)
+        elif choice == "3":
+            display_transactions_menu(cursor)
+        elif choice == "4":
+            print("Exiting the program.")
+            break
         else:
-            print("Invalid choice. Please enter 'yes' or 'no.'")
+            print("Invalid choice. Please try again.")
+
+def display_account_menu(cursor):
+    while True:
+
+        print("\n=== ACCOUNT MENU ===")
+        print("1: View All Accounts")
+        print("2: View Accounts by Type")
+        print("3: View Accounts by Customer ID")
+        print("4: Break out")
+        # ...
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            view_all_accounts(cursor)
+        elif choice == "2":
+            view_accounts_by_type(cursor)
+        elif choice == "3":
+            view_accounts_by_customer_id(cursor)
+        elif choice == "4":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def display_customer_menu(cursor):
+    while True:
+        print("\n=== CUSTOMER MENU ===")
+        print("1: View All Customers")
+        print("2: Find Customer By ID")
+        print("3: Find Customer by Name")
+        print("4: Break out")
+        # ...
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            view_all_customers(cursor)
+        elif choice == "2":
+            find_customer_by_id(cursor)
+        elif choice == "3":
+            find_customer_by_name(cursor)
+        elif choice == "4":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def display_transactions_menu(cursor):
+    while True:
+
+        print("\n=== TRANSACTIONS MENU ===")
+        print("1: View All Transactions")
+        print("2: Find Transactions By Account ID")
+        print("3: Break Out")
+        # ...
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            view_all_transactions(cursor)
+        elif choice == "2":
+            find_transactions_by_account_id(cursor)
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+# Other existing function definitions remain the same

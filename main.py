@@ -9,25 +9,26 @@ conn, cursor = connect_to_database(mydb_config, create_if_not_exists = True)
 def choice_function(choice):
     if choice == "1":
         print("You selected Option 1")
-        login(conn, cursor)
+        login(cursor)
     elif choice == "2":
         print("You selected Option 2")
-        register(conn, cursor)
+        #register(conn, cursor)
     elif choice == "3":
         print("You selected Option 3")
+        main_menu(cursor)
         return
     elif choice == "q":
         print("Quitting the program.")
     else:
         print("Invalid choice. Please select a valid option.")
+        mainmenu()
 
 def mainmenu():
     choice_sel = ""
 
-    if choice_sel != "q" or "1":
-        draw_menu()
-        choice_sel = input("Select from the options above\nOr input 'q' to quit the program: ")
-        choice_function(choice_sel)
+    draw_menu()
+    choice_sel = input("Select from the options above\nOr input 'q' to quit the program: ")
+    choice_function(choice_sel)
 
 # Main Running function inside the if statement
 
