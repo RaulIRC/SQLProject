@@ -208,8 +208,9 @@ def view_all_accounts(cursor):
         print("No accounts found.")
 
 def view_accounts_by_type(cursor):
-    account_type = input("Enter Account Type: ")
-    cursor.execute("SELECT * FROM Account WHERE AccountType = ?", (account_type,))
+    account_type = input("Enter Account Type (Checking/Savings):")
+    query = "SELECT * FROM Account WHERE AccountType = %s" % (account_type)
+    cursor.execute(query)
     accounts = cursor.fetchall()
     if accounts:
         print(f"\n=== Accounts with Account Type '{account_type}' ===")
@@ -217,15 +218,20 @@ def view_accounts_by_type(cursor):
             print(account)
     else:
         print(f"No accounts found with Account Type '{account_type}'.")
+        view_accounts_by_type(cursor)
 
 def view_accounts_by_customer_id(cursor):
     customer_id = input("Enter Customer ID: ")
-    cursor.execute("SELECT * FROM Account WHERE CustomerID = ?", (customer_id,))
+    query = "SELECT * FROM Account WHERE AccountID = %s" % (customer_id)
+    cursor.execute(query)
     accounts = cursor.fetchall()
     if accounts:
         print(f"\n=== Accounts for Customer ID '{customer_id}' ===")
         for account in accounts:
-            print(account)
+            #print(account)
+            print(f"Account ID: {customer_id}")
+            print(f"Account Type: {account[2]}")
+            print(f"Balance: ${account[3]}")
     else:
         print(f"No accounts found for Customer ID '{customer_id}'.")
 
@@ -290,7 +296,7 @@ def find_transactions_by_account_id(cursor):
     print("You've chosen to find transactions by Account ID.")
     account_id = input("Enter Account ID: ")
     print(f"\nStep 1: Searching for transactions with Account ID '{account_id}'...")
-    cursor.execute("SELECT * FROM Transaction WHERE AccountID = ?", (account_id,))
+    cursor.execute("SELECT * FROM Transaction WHERE AccountID = %s" % (account_id))
     transactions = cursor.fetchall()
     if transactions:
         print(f"\nStep 2: Displaying transactions for Account ID '{account_id}'")
