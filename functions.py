@@ -27,23 +27,34 @@ def get_user_pass():
     password_choice = input("Please input your password: ")
     return username_choice, password_choice
 
-def login(cursor):
+def login(cursor, conn):
     
     reset_values()
 
     username_choice = input("Please input your username: ")
     password_choice = input("Please input your password: ")
 
-    sql_query = "SELECT PASSWORD FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, password_choice)
+    sql_query = "SELECT * FROM %s WHERE USERNAME = '%s' AND PASSWORD = '%s'" % (database_table, username_choice, password_choice)
 
     cursor.execute(sql_query)
 
     reset_values()
 
-    result = cursor.fetchall()
+    userID = cursor.fetchone()
+    IDz = userID[1]
 
-    if result:
-        display_menu()
+    role = userID[3]
+
+    if userID:
+        if role == 'customer':
+            print("This is a customer")
+            display_menu(userID, cursor, conn)
+        elif role == 'employee':
+            print("This is an employee")
+            main_menu(cursor)
+        elif role == 'admin':
+            print("This is an admin.")
+            main_menu(cursor)
         print("true")
     else:
         print("Username and Password not matching anything in the system please try again!")
@@ -75,7 +86,65 @@ def register(conn, cursor):
 
         register()
 
+def get_balance(userID, cursor):
+    query = "SELECT Balance FROM Account WHERE AccountID = %s" % (userID[0])
+    cursor.execute(query)
+    balance = cursor.fetchone()
+    return balance[0] if balance else None
 
+def display_menu(userID, cursor, conn):
+    while True:
+                balance = get_balance(userID, cursor)
+                print(f"Welcome {userID[3]}, {userID[1]}!")
+                print(f"Balance: {balance}")
+
+                print("\n1. Deposit")
+                print("2. Withdraw")
+                print("3. Logout")
+
+                choice = input("Enter your choice (1-3): ")
+
+                if choice == "1":
+                    amount = float(input("Enter the deposit amount: $"))
+                    deposit(userID, amount, cursor, conn)
+
+                elif choice == "2":
+                    amount = float(input("Enter the withdrawal amount: $"))
+                    withdraw(userID, amount, cursor, conn)
+
+                elif choice == "3":
+                    print("Logout successful. Goodbye!")
+                    break
+
+                else:
+                    print("Invalid choice. Please enter a number between 1 and 3.")
+
+def withdraw(userID, amount, cursor, conn):
+    balance = get_balance(userID, cursor)
+    if balance <= 0:
+        print("You cannot withdraw any more money.")
+    else:
+        subtracted_balance = balance - amount
+
+        query = "UPDATE Account SET Balance = %s WHERE AccountID = %s" % (subtracted_balance, userID[0])
+
+        cursor.execute(query)
+
+        if cursor.rowcount > 0:
+            conn.commit()
+
+            print(f"Withdrew ${amount} from AccountID {userID[1]}.")
+
+        else:
+            print("Insufficient funds or invalid AccountID.")
+
+def deposit(userID, amount, cursor, conn):
+    balance = get_balance(userID, cursor)
+    added_balance = balance + amount
+    query = "UPDATE Account SET Balance = %s WHERE AccountID = %s" % (added_balance, userID[0])
+    cursor.execute(query)
+    conn.commit()
+    print(f"Deposited ${amount} to AccountID {userID}.")
 
 def username_check(cursor, username_choice):
     sql_query = "SELECT USERNAME FROM %s WHERE USERNAME = '%s'" % (database_table, username_choice)
@@ -102,6 +171,23 @@ def password_check(cursor, username_choice):
     else:
         print("Password was not found in the database!")
         return False
+
+def databaseErrorMenu():
+
+    while True:
+        print("************************************************")
+        print("    Welcome to the Database Creation Wizard    ")
+        print("************************************************")
+        print("Warning: You are about to create a new database.")
+
+        choice = input("Do you want to continue? (Y/n): ").strip().lower()
+
+        if choice == "yes":
+            #print("\nDatabase created successfully!\n")
+            return True
+        elif choice == "no":
+            print("\nDatabase creation canceled. Exiting program.\n")
+            return False
 
 
 def display_account_menu():

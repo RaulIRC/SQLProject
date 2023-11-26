@@ -55,6 +55,72 @@ def connect_to_database(mydb_config: dict[str, ], create_if_not_exists=False):
 
     return None, None
 
+def fullDatabaseCreation():
+    # SQL query for creating tables
+        create_table_queries = [
+            """
+            CREATE TABLE Customer (
+                CustomerID INT AUTO_INCREMENT PRIMARY KEY,
+                Name VARCHAR(50) NOT NULL,
+                Address VARCHAR(100),
+                Phone VARCHAR(25),
+                Email VARCHAR(50) UNIQUE,
+                DateOfBirth DATE
+            )
+            """,
+            """
+            CREATE TABLE Account (
+                AccountID INT AUTO_INCREMENT PRIMARY KEY,
+                CustomerID INT NOT NULL,
+                AccountType VARCHAR(50) NOT NULL,
+                Balance DECIMAL(15, 2) NOT NULL,
+                DateOpened DATE NOT NULL,
+                Status VARCHAR(50) NOT NULL,
+                FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+            )
+            """,
+            """
+            CREATE TABLE BankTransaction (
+                TransactionID INT AUTO_INCREMENT PRIMARY KEY,
+                AccountID INT NOT NULL,
+                Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                Amount DECIMAL(15, 2) NOT NULL,
+                Type VARCHAR(50) NOT NULL,
+                Description TEXT,
+                FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
+            )
+            """,
+            """
+            CREATE TABLE Employee (
+                EmployeeID INT AUTO_INCREMENT PRIMARY KEY,
+                Name VARCHAR(50) NOT NULL,
+                Department VARCHAR(50),
+                Position VARCHAR(50),
+                SupervisorID INT,
+                FOREIGN KEY (SupervisorID) REFERENCES Employee(EmployeeID)
+            )
+            """,
+            """
+            CREATE TABLE Users (
+                UserID INT AUTO_INCREMENT PRIMARY KEY,
+                Username VARCHAR(25) NOT NULL UNIQUE,
+                Password VARCHAR(50) NOT NULL,
+                Role ENUM('customer', 'employee', 'admin') NOT NULL,
+                CustomerID INT,
+                FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+            )
+            """,
+            """
+            CREATE TABLE AuditLog (
+                LogID INT AUTO_INCREMENT PRIMARY KEY,
+                UserID INT NOT NULL,
+                Activity TEXT NOT NULL,
+                Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (UserID) REFERENCES Users(UserID)
+            )
+            """
+        ]
+
 def databaseCreation(cursor, mydb_config):
     cursor.execute(f"CREATE DATABASE IF NOT EXISTS {mydb_config['database']};")
     cursor.execute(f"Use {mydb_config['database']};")
@@ -64,7 +130,7 @@ def databaseCreation(cursor, mydb_config):
 
 def multiDatabaseCreation(cursor):
     cursor.execute(f"CREATE TABLE Customer ( CustomerID INT AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(25) NOT NULL, Address VARCHAR(50), Phone VARCHAR(25), Email VARCHAR(50), DateOfBirth DATE);")
-    cursor.execute(f"CREATE TABLE Account ( AccountID INT AUTO_INCREMENT PRIMARY KEY, CustomerID INT, AccountType VARCHAR(50) NOT NULL, Balance DECIMAL(10, 2) NOT NULL, DateOpened DATE NOT NULL, Status VARCHAR(50) NOT NULL, FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID));")
+    cursor.execute(f"CREATE TABLE Account ( AccountID INT AUTO_INCREMENT PRIMARY KEY, CustomerID INT, AccountType VARCHAR(50) NOT NULL, Balance DECIMAL(10, 2) NOT NULL, DateOpened DATE NOT NULL, Status VARCHAR(50) NOT NULL, FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID), FOREIGN KEY (AccountID) REFERENCES Users(uID));")
     cursor.execute(f"CREATE TABLE Transaction ( TransactionID INT AUTO_INCREMENT PRIMARY KEY, AccountID INT, Date DATE NOT NULL, Amount DECIMAL(10, 2) NOT NULL, Type VARCHAR(50) NOT NULL, Description TEXT, FOREIGN KEY (AccountID) REFERENCES Account(AccountID));")
 
 def databasePopulation(cursor):
